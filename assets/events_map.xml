@@ -1,29 +1,22 @@
 <?xml version="1.0"?>
 <eventsMap>
 	<initialization>
-		<reportSuites>
-			<reportSuite>my-account-suite</reportSuite>
-		</reportSuites>
-		<visitorNamespace>companyname</visitorNamespace>
-		<trackingServer>companyname.122.2o7.net</trackingServer>
-		<pageName>{experience.playerName}</pageName>
-		<pageURL>{experience.url}</pageURL>
-		<trackClickMap value="true" />
-		<currencyCode>USD</currencyCode>
-		<charSet>UTF-8</charSet>
+		<dataSourceID></dataSourceID>
+		<trackingModes>
+			<mode name="beacon" value="false" time="5" /><!-- time in seconds -->
+			<mode name="quartile" value="false" />
+		</trackingModes>
 	</initialization>
 	
 	
 	<events>
 		<!-- VIDEO SPECIFIC EVENTS -->
 		<event name="mediaBegin">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<prop number="5" value="{experience.url}" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="3" />
+			<tag name="eventName" value="Media Begin" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clip_v" value="{percent complete}" />
 		</event>
 	
 		<event name="mediaComplete">
