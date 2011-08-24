@@ -17,9 +17,11 @@ package
 	import com.brightcove.api.modules.MenuModule;
 	import com.brightcove.api.modules.SocialModule;
 	import com.brightcove.api.modules.VideoPlayerModule;
+	import com.brightcove.opensource.EventsMap;
 	
 	import flash.display.LoaderInfo;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
 	import flash.net.URLRequest;
@@ -48,6 +50,7 @@ package
 		private var _dataSourceID:String; //Webtrends Profile ID
 		private var _currentVideo:VideoDTO;
 		private var _currentRendition:RenditionAssetDTO;
+		private var _eventsMap:EventsMap;
 		private var _seekCheckTimer:Timer;
 		private var _positionBeforeSeek:Number;
 		private var _currentPosition:Number;
@@ -84,6 +87,23 @@ package
 			}
 			
 			_currentVideo = _videoPlayerModule.getCurrentVideo();
+			
+			/*
+			Look for an eventsMap XML file URL. If it exists, load it and use that for the _eventsMap. When the 'complete' 
+			handler fires, we can configure the actionsource object and anything else that relies on the _eventsMap being 
+			populated. If there isn't an XML file, we must be using the compiled XML file, in which case we can just 
+			manually call the onEventsMapParsed handler and it will configure everything straight away.
+			*/
+			var xmlFileURL:String = getParamValue('eventsMap');
+			if(xmlFileURL)
+			{
+				_eventsMap = new EventsMap(xmlFileURL);
+				_eventsMap.addEventListener(Event.COMPLETE, onEventsMapParsed);
+			}
+			else
+			{
+				onEventsMapParsed(null);
+			}
 		}
 		
 		/**
@@ -133,6 +153,11 @@ package
 		
 		
 		//-------------------------------------------------------------------------------------------- EVENT HANDLERS
+		private function onEventsMapParsed(pEvent:Event):void
+		{
+//			configureOmnitureDefaults();
+		}
+		
 		private function onMediaChange(pEvent:MediaEvent):void
 		{
 			_currentVideo = _videoPlayerModule.getCurrentVideo();	
