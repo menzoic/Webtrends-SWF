@@ -34,6 +34,7 @@ package
 	import flash.system.Capabilities;
 	import flash.system.Security;
 	import flash.utils.Timer;
+	import flash.utils.setTimeout;
 	
 	public class Webtrends extends CustomModule
 	{
@@ -48,7 +49,6 @@ package
 		//---------------------------------------------- FLAGS 
 		private var _mediaComplete:Boolean = true;
 		private var _mediaBegin:Boolean = false;
-		private var _videoMuted:Boolean = false;
 		private var _trackSeekForward:Boolean = false;
 		private var _trackSeekBackward:Boolean = false;
 		private var _multitrackAvailabilityChecked:Boolean = false;
@@ -290,10 +290,8 @@ package
 		{
 			var eventInfo:WebtrendsEventObject;
 			
-			if(_videoPlayerModule.getVolume() > 0)
-			{
-				_videoMuted = false;
-				
+			if(_videoPlayerModule.isMuted())
+			{	
 				eventInfo = findEventInformation('mediaMuted', _eventsMap.map, _currentVideo);
 				trackEvent(eventInfo, _timeWatched);
 			}
@@ -305,9 +303,7 @@ package
 		}
 		
 		private function onVolumeChange(pEvent:MediaEvent):void
-		{
-			_videoMuted = false;
-			
+		{	
 			if(_videoPlayerModule.getVolume() !== _currentVolume) //have to check this, otherwise the event fires twice for some reason
 			{
 				_currentVolume = _videoPlayerModule.getVolume();
