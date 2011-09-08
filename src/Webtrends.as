@@ -8,6 +8,7 @@ package
 	import com.brightcove.api.events.AdEvent;
 	import com.brightcove.api.events.CuePointEvent;
 	import com.brightcove.api.events.EmbedCodeEvent;
+	import com.brightcove.api.events.ExperienceEvent;
 	import com.brightcove.api.events.MediaEvent;
 	import com.brightcove.api.events.MenuEvent;
 	import com.brightcove.api.events.ShortenedLinkEvent;
@@ -70,7 +71,7 @@ package
 		{
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
-			trace("@lastModified 09.08.11 1314 EST");
+			trace("@lastModified 09.08.11 1620 EST");
 			
 			Security.allowDomain('*');
 		}
@@ -112,6 +113,9 @@ package
 		 */
 		private function setupEventListeners():void
 		{
+			_experienceModule.addEventListener(ExperienceEvent.ENTER_FULLSCREEN, onEnterFullScreen);
+			_experienceModule.addEventListener(ExperienceEvent.EXIT_FULLSCREEN, onExitFullScreen);
+			
 			_videoPlayerModule.addEventListener(MediaEvent.CHANGE, onMediaChange);
 			_videoPlayerModule.addEventListener(MediaEvent.BEGIN, onMediaBegin);
 			_videoPlayerModule.addEventListener(MediaEvent.PLAY, onMediaPlay);
@@ -165,6 +169,18 @@ package
 			}
 		}
 		
+		private function onEnterFullScreen(pEvent:ExperienceEvent):void
+		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
+		}
+		
+		private function onExitFullScreen(pEvent:ExperienceEvent):void
+		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
+		}
+		
 		private function onMediaChange(pEvent:MediaEvent):void
 		{
 			_currentVideo = _videoPlayerModule.getCurrentVideo();	
@@ -179,7 +195,9 @@ package
 				_mediaBegin = true;
 				_mediaComplete = false;
 				
-				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				var eventInfo:WebtrendsEventObject = findEventInformation('mediaBegin', _eventsMap.map, _currentVideo);
+				debug("EVENT INFO: " + eventInfo);
+				debug("EVENT TYPE: " + pEvent.type);
 				trackEvent(eventInfo, _timeWatched);
 			}
 		}
@@ -250,7 +268,8 @@ package
 		{
 			if(!_mediaComplete)
 			{
-				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				//pause
+				var eventInfo:WebtrendsEventObject = findEventInformation('mediaPause', _eventsMap.map, _currentVideo);
 				trackEvent(eventInfo, _timeWatched);
 			}
 		}
@@ -262,7 +281,7 @@ package
 				_mediaBegin = false;
 				_mediaComplete = true;
 				
-				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				var eventInfo:WebtrendsEventObject = findEventInformation('mediaComplete', _eventsMap.map, _currentVideo);
 				trackEvent(eventInfo, _timeWatched);
 			}
 		}
