@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <eventsMap>
 	<initialization>
-		<dataSourceID></dataSourceID>
+		<dataSourceID>abcdefghijlmno1234567890</dataSourceID>
 		<trackingModes>
 			<mode name="beacon" value="false" time="5" /><!-- time in seconds -->
 			<mode name="quartile" value="false" />
@@ -16,214 +16,214 @@
 			<tag name="clipName" value="{video.displayName}" />
 			<tag name="clipType" value="Brightcove" />
 			<tag name="currentPhase" value="Content" />
-			<tag name="clip_v" value="{percent complete}" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 	
 		<event name="mediaComplete">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="4" />
+			<tag name="eventName" value="Media Complete" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="mediaPause">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="5" />
+			<tag name="eventName" value="Media Pause" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="mediaResume">	
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="6" />
+			<tag name="eventName" value="Media Resume" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="seekForward">	
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="7" />
+			<tag name="eventName" value="Seek Forward" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="seekBackward">	
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="8" />
+			<tag name="eventName" value="Seek Backward" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
-		<event name="mediaMuted"></event>
-		<event name="mediaUnmuted"></event>
-		<event name="volumeChanged"></event>
-		<event name="renditionChangeRequest"></event>
-		<event name="renditionChangeComplete"></event>
+		<event name="mediaMuted">
+			<tag name="eventName" value="Media Muted" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
+		
+		<event name="mediaUnmuted">
+			<tag name="eventName" value="Media Unmuted" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
+		
+		<event name="volumeChanged">
+			<tag name="eventName" value="Volume Changed" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
+		
+		<event name="renditionChangeRequest">
+			<tag name="eventName" value="Rendition Change Request" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
+		
+		<event name="renditionChangeComplete">
+			<tag name="eventName" value="Rendition Change Complete" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
 		
 		<!-- time-based milestone example
 			<event name="milestone" type="time" value="10"> 
 		-->
 		<event name="milestone" type="percent" value="25">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="20" />
+			<tag name="eventName" value="Milestone 25" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="milestone" type="percent" value="50">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="21" />
+			<tag name="eventName" value="Milestone 50" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="milestone" type="percent" value="75">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="22" />
+			<tag name="eventName" value="Milestone 75" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 	
 		<!-- AD SPECIFIC EVENTS -->
 		<event name="adStart">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="9" />
+			<tag name="eventName" value="Ad Start" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 	
 		<event name="adPause">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="10" />
+			<tag name="eventName" value="Ad Pause" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="adResume">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="11" />
+			<tag name="eventName" value="Ad Resume" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="adComplete">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="13" />
+			<tag name="eventName" value="Ad Complete" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
-		<event name="adClick"></event>
-		<event name="adPostrollsComplete"></event>
-		
-		<event name="externalAd">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="12" />
+		<event name="adClick">
+			<tag name="eventName" value="Ad Click" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
+		
+		<event name="adPostrollsComplete">
+			<tag name="eventName" value="Ad Postrolls Complete" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
+		</event>
+		
+		<event name="externalAd"></event>
 		
 		<!-- MENU/SOCIAL SPECIFIC EVENTS -->
 		<event name="embedCodeRetrieved"></event>
 		<event name="linkGenerated"></event>
 		
 		<event name="codeCopied">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="14" />
+			<tag name="eventName" value="Code Copied" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 
 		<event name="linkCopied">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="15" />
+			<tag name="eventName" value="Link Copied" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
-		<event name="blogPosted">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="16" />
-		</event>
-		
-		<event name="menuPageOpened">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="17" />
-		</event>
-		
-		<event name="menuPageClosed">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="18" />
-		</event>
+		<event name="blogPosted"></event>
+		<event name="menuPageOpened"></event>
+		<event name="menuPageClosed"></event>
 		
 		<event name="emailSent">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="19" />
+			<tag name="eventName" value="Email Sent" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<!-- EXPERIENCE SPECIFIC EVENTS -->
 		<event name="enterFullScreen">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="1" />
+			<tag name="eventName" value="Enter Fullscreen" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 		
 		<event name="exitFullScreen">
-			<prop number="1" value="{video.customFields['my-custom-field']}" />
-			<prop number="2" value="{video.customFields['showname']}" />
-			<prop number="3" value="{video.displayName}" />
-			<prop number="4" value="Whatever Text I Want" />
-			<evar number="5" value="{video.customFields['episode-name']}" />
-			<eventNumbers value="2" />
+			<tag name="eventName" value="Exit Fullscreen" />
+			<tag name="clipName" value="{video.displayName}" />
+			<tag name="clipType" value="Brightcove" />
+			<tag name="currentPhase" value="Content" />
+			<tag name="clipID" value="{video.id}:{video.displayName}" />
 		</event>
 	</events>
 	

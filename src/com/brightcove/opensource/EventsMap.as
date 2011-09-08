@@ -12,14 +12,10 @@ package com.brightcove.opensource
 		private var _milestones:Array = new Array();
 		
 		//account-level stuff
-		private var _reportSuites:Array = new Array();
-		public var visitorNamespace:String;
-		public var trackingServer:String;
-		public var pageName:String;
-		public var pageURL:String;
-		public var trackClickMap:Boolean;
-		public var currencyCode:String;
-		public var charSet:String;
+		private var _dataSourceID:String;
+		private var _beaconTracking:Boolean = false;
+		private var _beaconInterval:uint = 5;
+		private var _quartileTracking:Boolean = false;
 		
 		[Embed(source="../assets/events_map.xml", mimeType="application/octet-stream")]
 		protected const XMLEventsMap:Class;
@@ -58,30 +54,31 @@ package com.brightcove.opensource
 		
 		private function parseAccountInfo(eventsMap:XML):void
 		{
-			var reportSuites:XMLList = eventsMap.initialization.reportSuites.reportSuite;
+			_dataSourceID = eventsMap.initialization.dataSourceID;
 			
-			for(var i:uint = 0; i < reportSuites.length(); i++)
+			var trackingModes:XMLList = eventsMap.initialization.trackingModes.mode;
+				
+			for(var i:uint = 0; i < trackingModes.length(); i++)
 			{
-				_reportSuites.push(reportSuites[i]);
-			}
-			
-			visitorNamespace = eventsMap.initialization.visitorNamespace;
-			trackingServer = eventsMap.initialization.trackingServer;
-			//pageName and pageURL may both be data-binded values for the experience module; that gets handled from OmnitureSWF.as
-			pageName = eventsMap.initialization.pageName;
-			pageURL = eventsMap.initialization.pageURL;
-			trackClickMap = (eventsMap.initialization.trackClickMap.@value == 'true') ? true : false;
-			
-			currencyCode = eventsMap.initialization.currencyCode; 
-			if(!currencyCode)
-			{
-				currencyCode = "USD"; //set default
-			}
-			
-			charSet = eventsMap.initialization.charSet;
-			if(!charSet)
-			{
-				charSet = "UTF-8"; //set default
+				var trackingMode:XML = trackingModes[i];
+				
+				switch(trackingMode.@name)
+				{
+					case 'beacon':
+						if(trackingMode.@value == "true")
+						{
+							_beaconTracking = true;
+						}
+						
+						_beaconInterval = trackingMode.@time;
+						break;
+					case 'quartile':
+						if(trackingMode.@value == "true")
+						{
+							_quartileTracking = true;
+						}
+						break;
+				}
 			}
 		}
 		
@@ -89,56 +86,40 @@ package com.brightcove.opensource
 		{
 			for(var node:String in eventsMap.events.event)
 			{
-				var event:XML = eventsMap.events.event[node];
-				
+				var event:XML = eventsMap.events.event[node];				
 				var eventName:String = event.@name;
-				var propsXML:XMLList = event.prop;
-				var eVarsXML:XMLList = event.evar;
-				var eventsXML:XMLList = event.eventNumbers;
+
+				var eventInfo:WebtrendsEventObject = new WebtrendsEventObject(eventName);
+				var tags:XMLList = event.tag;
 				
-				var eVars:Array = new Array();
-				for(var i:uint = 0; i < eVarsXML.length(); i++)
+				for(var i:uint = 0; i < tags.length(); i++)
 				{
-					var eVarXML:XML = eVarsXML[i];
-				
-					eVars.push({
-						number: eVarXML.@number,
-						value: eVarXML.@value 
-					});
+					var tag:XML = tags[i];
+					
+					switch(String(tag.@name).toLowerCase())
+					{
+						case "eventname":
+							eventInfo.eventName = tag.@value;
+							break;
+						case "clipname":
+							eventInfo.clipName = tag.@value;
+							break;
+						case "cliptype":
+							eventInfo.clipType = tag.@value;
+							break;
+						case "currentphase":
+							eventInfo.currentPhase = tag.@value;
+							break;
+						case "clipid":
+							eventInfo.clipID = tag.@value;
+							break;
+					}
 				}
-				
-				var props:Array = new Array();
-				for(var j:uint = 0; j < propsXML.length(); j++)
-				{
-					var propXML:XML = propsXML[j];
-				
-					props.push({
-						number: propXML.@number,
-						value: propXML.@value 
-					});
-				}
-				
-				var events:Array = new Array();
-				for(var k:uint = 0; k < eventsXML.length(); k++)
-				{
-					var eventXML:XML = eventsXML[k];
-				
-					events.push(eventXML.@value);
-				}
-				
-				var eventInfo:Object = {
-					name: eventName,
-					props: props,
-					eVars: eVars,
-					events: events
-				};
 				
 				if(eventName == 'milestone')
 				{
 					var milestone:Object = {
-						props: props,
-						eVars: eVars,
-						events: events,
+						eventInfo: eventInfo,
 						type: event.@type,
 						marker: event.@value
 					};
@@ -146,13 +127,17 @@ package com.brightcove.opensource
 					_milestones.push(milestone);
 				}
 				
-				_map.push(eventInfo);
+				if(eventInfo.hasValues())
+				{
+					_map.push(eventInfo);
+					trace("WEBTRENDS EVENT OBJECT: " + eventInfo.toString());
+				}
 			}
 		}
 		
-		public function get reportSuites():String
+		public function get dataSourceID():String
 		{
-			return _reportSuites.join(',');
+			return _dataSourceID;
 		}
 		
 		public function get map():Array

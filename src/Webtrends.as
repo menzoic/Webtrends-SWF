@@ -17,14 +17,20 @@ package
 	import com.brightcove.api.modules.MenuModule;
 	import com.brightcove.api.modules.SocialModule;
 	import com.brightcove.api.modules.VideoPlayerModule;
+	import com.brightcove.opensource.DataBinder;
 	import com.brightcove.opensource.EventsMap;
+	import com.brightcove.opensource.WebtrendsEventObject;
 	
 	import flash.display.LoaderInfo;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
+	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.system.Capabilities;
 	import flash.system.Security;
 	import flash.utils.Timer;
 	
@@ -50,20 +56,21 @@ package
 		private var _dataSourceID:String; //Webtrends Profile ID
 		private var _currentVideo:VideoDTO;
 		private var _currentRendition:RenditionAssetDTO;
-		private var _eventsMap:EventsMap;
-		private var _seekCheckTimer:Timer;
+		private var _eventsMap:EventsMap = new EventsMap();
+		private var _binder:DataBinder = new DataBinder();
+		private var _seekCheckTimer:Timer = new Timer(1000);
 		private var _positionBeforeSeek:Number;
 		private var _currentPosition:Number;
 		private var _currentVolume:Number;
 		private var _customID:String;
 		private var _previousTimestamp:Number;
-		private var _timeWatched:Number;
+		private var _timeWatched:Number = 0; //in seconds
 		
 		public function Webtrends()
 		{
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
-			trace("@lastModified 08.23.11 2129 EST");
+			trace("@lastModified 09.08.11 1314 EST");
 			
 			Security.allowDomain('*');
 		}
@@ -79,12 +86,6 @@ package
 			_cuePointsModule = player.getModule(APIModules.CUE_POINTS) as CuePointsModule;
 			
 			setupEventListeners();
-			
-			_dataSourceID = getParamValue('dsid');
-			if(!_dataSourceID)
-			{
-				throw new Error("You did not provide a Webtrends Data Source ID (dsid). No analytics will be tracked.");
-			}
 			
 			_currentVideo = _videoPlayerModule.getCurrentVideo();
 			
@@ -155,7 +156,13 @@ package
 		//-------------------------------------------------------------------------------------------- EVENT HANDLERS
 		private function onEventsMapParsed(pEvent:Event):void
 		{
-//			configureOmnitureDefaults();
+			var dsidParam:String = _dataSourceID = getParamValue('dsid');
+			_dataSourceID = (dsidParam) ? dsidParam : _eventsMap.dataSourceID;
+			
+			if(!_dataSourceID)
+			{
+				throw new Error("You did not provide a Webtrends Data Source ID (dsid). No analytics will be tracked.");
+			}
 		}
 		
 		private function onMediaChange(pEvent:MediaEvent):void
@@ -171,16 +178,23 @@ package
 				
 				_mediaBegin = true;
 				_mediaComplete = false;
+				
+				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
 		private function onMediaPlay(pEvent:MediaEvent):void
 		{
-			if(_mediaComplete)
+			if(!_mediaBegin)
 			{
-				//this is a true media begin event (mediaBegin doesn't fire on replay)
-				_mediaComplete = false;
-				_currentVideo = _videoPlayerModule.getCurrentVideo();
+				onMediaBegin(pEvent);
+			}
+			else
+			{
+				//unpause
+				var eventInfo:WebtrendsEventObject = findEventInformation('mediaResume', _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
@@ -232,27 +246,42 @@ package
 			_seekCheckTimer.start();
 		}
 		
-		private function onMediaStop(event:MediaEvent):void
+		private function onMediaStop(pEvent:MediaEvent):void
 		{
 			if(!_mediaComplete)
 			{
+				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
 		private function onMediaComplete(pEvent:MediaEvent):void
 		{
-			_mediaComplete = true;
+			if(!_mediaComplete)
+			{
+				_mediaBegin = false;
+				_mediaComplete = true;
+				
+				var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
+			}
 		}
 		
 		private function onMuteChange(pEvent:MediaEvent):void
 		{
+			var eventInfo:WebtrendsEventObject;
+			
 			if(_videoPlayerModule.getVolume() > 0)
 			{
 				_videoMuted = false;
+				
+				eventInfo = findEventInformation('mediaMuted', _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 			else
 			{
-				_videoMuted = true;
+				eventInfo = findEventInformation('mediaUnmuted', _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
@@ -263,81 +292,118 @@ package
 			if(_videoPlayerModule.getVolume() !== _currentVolume) //have to check this, otherwise the event fires twice for some reason
 			{
 				_currentVolume = _videoPlayerModule.getVolume();
+				
+				var eventInfo:WebtrendsEventObject = findEventInformation('volumeChanged', _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
 		private function onRenditionChangeRequest(pEvent:MediaEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onRenditionChangeComplete(pEvent:MediaEvent):void
 		{
-			_currentRendition = _videoPlayerModule.getCurrentRendition();
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdStart(pEvent:AdEvent):void
 		{		
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdPause(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdResume(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onExternalAd(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdComplete(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdClick(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onAdPostrollsComplete(pEvent:AdEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onEmbedCodeRetrieved(pEvent:EmbedCodeEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onLinkGenerated(pEvent:ShortenedLinkEvent):void
 		{	
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onCopyCode(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onCopyLink(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onBlogPostClick(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onMenuPageOpen(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onMenuPageClose(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onSendEmailClick(pEvent:MenuEvent):void
 		{
+			var eventInfo:WebtrendsEventObject = findEventInformation(pEvent.type, _eventsMap.map, _currentVideo);
+			trackEvent(eventInfo, _timeWatched);
 		}
 		
 		private function onCuePoint(pEvent:CuePointEvent):void
 		{
 			var cuePoint:VideoCuePointDTO = pEvent.cuePoint;
+			var eventInfo:WebtrendsEventObject;
 			
 			if(cuePoint.type == 1 && cuePoint.name == "webtrends-milestone")
 			{   
@@ -346,19 +412,20 @@ package
 				if(cuePoint.metadata.indexOf('%') !== -1) //percentage
 				{
 					metadataSplit = cuePoint.metadata.split('%');
-//					trackingInfo = findEventInformation("milestone", _eventsMap.map, _currentVideo, "percent", metadataSplit[0]);
+					
+					eventInfo = findEventInformation('milestone', _eventsMap.map, _currentVideo, 'percent', metadataSplit[0]);
 					
 					_cuePointsModule.removeCodeCuePointsAtTime(_currentVideo.id, cuePoint.time);
 				}
 				else if(cuePoint.metadata.indexOf('s') !== -1) //seconds
 				{
 					metadataSplit = cuePoint.metadata.split('s');
-//					trackingInfo = findEventInformation("milestone", _eventsMap.map, _currentVideo, "time", metadataSplit[0]);
+					eventInfo = findEventInformation('milestone', _eventsMap.map, _currentVideo, 'time', metadataSplit[0]);
 					
 					_cuePointsModule.removeCodeCuePointsAtTime(_currentVideo.id, cuePoint.time);
 				}
 				
-//				trackEvent(trackingInfo);
+				trackEvent(eventInfo, _timeWatched);
 			}
 		}
 		
@@ -367,6 +434,9 @@ package
 			if(_trackSeekBackward || _trackSeekForward)
 			{
 				var eventName:String = (_trackSeekForward) ? "seekForward" : "seekBackward";
+				
+				var eventInfo:WebtrendsEventObject = findEventInformation(eventName, _eventsMap.map, _currentVideo);
+				trackEvent(eventInfo, _timeWatched);
 				
 				//reset values
 				_trackSeekForward = false;
@@ -380,20 +450,20 @@ package
 		
 		
 		//-------------------------------------------------------------------------------------------- EVENT TRACKING
-		private function trackEvent():void
+		private function trackEvent(pEventInfo:WebtrendsEventObject, pPlayTime:Number):void
 		{
-			if(ExternalInterface.available)
+			if(pEventInfo && pEventInfo.hasValues())
 			{
-				//check if we can use multitrack
-			}
-			else
-			{
-				//we can't use multitrack, so just call the URL directly
-				var request:URLRequest = new URLRequest();
+				var request:URLRequest = new URLRequest(getRequestString(pEventInfo, pPlayTime));
+				var loader:URLLoader = new URLLoader();
+				//loader.addEventListener(Event.COMPLETE, onEventPingComplete);
+				//loader.addEventListener(IOErrorEvent.IO_ERROR, onEventPingIOError);
+				//loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onEventPingSecurityError);
+				loader.load(request);
 			}
 		}
 		
-		private function getRequestString(pMultitrackAvailable:Boolean = false):String
+		private function getRequestString(pEventInfo:WebtrendsEventObject, pPlayTime:Number):String
 		{
 			var requestString:String;
 //			
@@ -410,7 +480,43 @@ package
 //				var nojsstr = "http://" + sdcserver + "/" + _dataSourceID + "/dcs.gif?dcsuri=" + dcsuri + "&WT.js=No&WT.ti=" + pgtitle + "&bc_evt=" + eventName + "&bc_expid=" + _experienceModule.getExperienceID() + "&bc_expname=" + _experienceModule.getPlayerName() + "&bc_url=" + _experienceModule.getExperienceURL() + "&bc_vid=" + _currentVideo.id + "&bc_vname=" + _currentVideo.displayName + "&bc_pid=" + _currentVideo.lineupId + nojsstr;
 //			}
 //			
-			return requestString;
+			//http://statse.webtrendslive.com/dcsh9n6f8wz5bdo3gun6nwrol_9u6d/dcs.gif?&dcsdat=1315506484403&dcssip=apitest.clark-data-center.com&
+			//dcsuri=/brightcove/testA.html&WT.tz=-4&WT.bh=14&WT.ul=en-US&WT.cd=24&WT.sr=1280x800&WT.jo=Yes&WT.ti=Brightcove%20Test%20Video%20Page&
+			//WT.js=Yes&WT.jv=1.8&WT.ct=unknown&WT.bs=1280x646&WT.fv=10.2&WT.slv=Unknown&WT.tv=9.3.0&WT.dl=40&WT.ssl=0&
+			//WT.es=apitest.clark-data-center.com/brightcove/testA.html&WT.vt_f_a=2&WT.vt_f=2&WT.clip_ev=MediaPlay&WT.clip_t=Brightcove&WT.clip_p=Content&
+			//WT.clip_n=Sample%20Video%202&WT.clip_v=0
+			
+			var webtrendsURL:String = 'http://statse.webtrendslive.com/' + 
+				_dataSourceID + '/dcs.gif?dcsdat=' + String(new Date().time) + '&' +
+				'dcssip=' + getTopLevelDomain() + '&' +
+				'dcsuri=/brightcove/event.html&' +
+				'WT.tz=' + getTimezone() + '&';
+//			webtrendsURL += 'WT.bh=14' + '&';
+			webtrendsURL += 'WT.ul=en.US&';
+//			webtrendsURL += 'WT.cd=24&';
+			webtrendsURL += 'WT.sr=' + getScreenResolution() + '&';
+//			webtrendsURL += 'WT.jo=Yes&';
+			webtrendsURL += 'WT.ti=' + _currentVideo.displayName + '&';
+			webtrendsURL += 'WT.js=' + getJavascriptAvailable() + '&';
+//			webtrendsURL += 'WT.jv=1.88&';
+//			webtrendsURL += 'WT.ct=unknown&';
+//			webtrendsURL += 'WT.bs=1280x646&'; //video/player resolution?
+			webtrendsURL += 'WT.fv=' + flash.system.Capabilities.version + '&';
+			webtrendsURL += 'WT.slv=unknown&';
+//			webtrendsURL += 'WT.tv=9.3.0&';
+//			webtrendsURL += 'WT.dl=49&';
+			webtrendsURL += 'WT.ssl=0&';
+			webtrendsURL += 'WT.es=' + _experienceModule.getExperienceURL() + '&';
+//			webtrendsURL += 'WT.vt_f_a=2&';
+//			webtrendsURL += 'WT.vt_f=2&';
+			webtrendsURL += 'WT.clip_ev=' + pEventInfo.eventName + '&';
+			webtrendsURL += 'WT.clip_t=' + pEventInfo.clipType + '&';
+			webtrendsURL += 'WT.clip_p=' + pEventInfo.currentPhase + '&';
+			webtrendsURL += 'WT.clip_n=' + pEventInfo.clipName + '&';
+			webtrendsURL += 'WT.clip_id=' + pEventInfo.clipID + '&';
+			webtrendsURL += 'WT.clip_v=' + Math.round(pPlayTime);
+			
+			return webtrendsURL;
 		}
 		//--------------------------------------------------------------------------------------------
 		
@@ -430,6 +536,65 @@ package
 			{
 				createCuePoints(_eventsMap.milestones, _currentVideo);
 			}
+		}
+		
+		private function getTimezone():Number
+		{
+			var timezoneOffset:Number = new Date().timezoneOffset;
+			var timezone:Number = -(Math.round(timezoneOffset/60));
+			
+			return timezone;
+		}
+		
+		private function getScreenResolution():String
+		{
+			return flash.system.Capabilities.screenResolutionX + 'x' + flash.system.Capabilities.screenResolutionY;
+		}
+		
+		private function getTopLevelDomain():String
+		{
+			var topLevelDomain:String;
+			var domainSplit:Array = _experienceModule.getExperienceURL().split('/');
+			var topLevelDomainIndex:uint;
+			
+			for(var i:uint = 0; i < domainSplit.length; i++)
+			{
+				var domainItem:String = domainSplit[i];
+				if(domainItem.length > 1 && domainItem.indexOf('http') == -1)
+				{
+					topLevelDomainIndex = i;
+					break;
+				}
+			}
+			
+			debug('TOP LEVEL DOMAIN: ' + domainSplit[topLevelDomainIndex]);
+			
+			return domainSplit[topLevelDomainIndex];
+			
+//			if(_experienceModule.getExperienceURL().indexOf('://www') !== -1)
+//			{
+//				
+//			}
+//			else if(_experienceModule.getExperienceURL().indexOf('://') !== -1)
+//			{
+//				
+//			}
+//			else
+//			{
+//				
+//			}
+//			
+//			return topLevelDomain;
+		}
+		
+		private function getJavascriptAvailable():String
+		{
+			if(ExternalInterface.available)
+			{
+				return 'true';
+			}
+			
+			return 'false';
 		}
 		
 		/**
@@ -465,7 +630,7 @@ package
 					{
 						cuePoint = {
 							type: 1, //code cue point
-							name: "omniture-milestone",
+							name: "analytics-milestone",
 							metadata: milestone.marker + "%", //percent
 								time: (video.length/1000) * (milestone.marker/100)
 						};
@@ -474,7 +639,7 @@ package
 					{
 						cuePoint = {
 							type: 1, //code cue point
-							name: "omniture-milestone",
+							name: "analytics-milestone",
 							metadata: milestone.marker + "s", //seconds
 								time: milestone.marker
 						};
@@ -483,14 +648,14 @@ package
 					cuePoints.push(cuePoint);
 				}
 				
-				//clear out existing omniture cue points if they're still around after replay
+				//clear out existing analytics cue points if they're still around after replay
 				var existingCuePoints:Array = _cuePointsModule.getCuePoints(video.id);
 				if(existingCuePoints)
 				{
 					for(var j:uint = 0; j < existingCuePoints.length; j++)
 					{
 						var existingCuePoint:VideoCuePointDTO = existingCuePoints[j];
-						if(existingCuePoint.type == 1 && existingCuePoint.name == 'omniture-milestone')
+						if(existingCuePoint.type == 1 && existingCuePoint.name == 'analytics-milestone')
 						{
 							_cuePointsModule.removeCodeCuePointsAtTime(video.id, existingCuePoint.time);
 						}
@@ -499,6 +664,36 @@ package
 				
 				_cuePointsModule.addCuePoints(video.id, cuePoints);
 			}
+		}
+		
+		private function findEventInformation(pEventName:String, pEventsMap:Array, pVideo:VideoDTO, pMilestoneType:String = null, pMilestoneMarker:uint = 0):WebtrendsEventObject
+		{
+			for(var i:uint = 0; i < pEventsMap.length; i++)
+			{
+				var eventInfo:WebtrendsEventObject = pEventsMap[i];
+				eventInfo.bindEventInfoValues(_binder, _experienceModule, pVideo);
+				
+				//if it's a milestone, head into the first inner if block. or enter if the argument name passed in matches the mapped event name
+				if(pEventName == "milestone" || pEventName == eventInfo.internalEventName)
+				{
+					if(pEventName == "milestone")
+					{
+						for(var l:uint = 0; l < _eventsMap.milestones.length; l++)
+						{
+							var milestone:Object = _eventsMap.milestones[l];
+							
+							if(milestone.type.toLowerCase() == pMilestoneType.toLowerCase() && milestone.marker == pMilestoneMarker)
+							{
+								return milestone.eventInfo;
+							}							
+						}
+					}
+					
+					return eventInfo;
+				}
+			}
+			
+			return null;
 		}
 		
 		/**
