@@ -505,31 +505,31 @@ package
 				_dataSourceID + '/dcs.gif?dcsdat=' + String(new Date().time) + '&' +
 				'dcssip=' + getTopLevelDomain() + '&' +
 				'dcsuri=/brightcove/event.html&' +
-				'WT.tz=' + getTimezone() + '&';
-//			webtrendsURL += 'WT.bh=14' + '&';
-			webtrendsURL += 'WT.ul=en.US&';
-//			webtrendsURL += 'WT.cd=24&';
-			webtrendsURL += 'WT.sr=' + getScreenResolution() + '&';
-//			webtrendsURL += 'WT.jo=Yes&';
-			webtrendsURL += 'WT.ti=' + _currentVideo.displayName + '&';
-			webtrendsURL += 'WT.js=' + getJavascriptAvailable() + '&';
-//			webtrendsURL += 'WT.jv=1.88&';
-//			webtrendsURL += 'WT.ct=unknown&';
-//			webtrendsURL += 'WT.bs=1280x646&'; //video/player resolution?
-			webtrendsURL += 'WT.fv=' + flash.system.Capabilities.version + '&';
-			webtrendsURL += 'WT.slv=unknown&';
-//			webtrendsURL += 'WT.tv=9.3.0&';
-//			webtrendsURL += 'WT.dl=49&';
-			webtrendsURL += 'WT.ssl=0&';
-			webtrendsURL += 'WT.es=' + _experienceModule.getExperienceURL() + '&';
-//			webtrendsURL += 'WT.vt_f_a=2&';
-//			webtrendsURL += 'WT.vt_f=2&';
-			webtrendsURL += 'WT.clip_ev=' + pEventInfo.eventName + '&';
-			webtrendsURL += 'WT.clip_t=' + pEventInfo.clipType + '&';
-			webtrendsURL += 'WT.clip_p=' + pEventInfo.currentPhase + '&';
-			webtrendsURL += 'WT.clip_n=' + pEventInfo.clipName + '&';
-			webtrendsURL += 'WT.clip_id=' + pEventInfo.clipID + '&';
-			webtrendsURL += 'WT.clip_v=' + Math.round(pPlayTime);
+				'WT.tz=' + getTimezone() + '&' +
+//				'WT.bh=14' + '&' +
+				'WT.ul=en.US&' +
+//				'WT.cd=24&' + 
+				'WT.sr=' + getScreenResolution() + '&' +
+//				'WT.jo=Yes&' +
+				'WT.ti=' + _currentVideo.displayName + '&' +
+				'WT.js=' + getJavascriptAvailable() + '&' + 
+//				'WT.jv=1.88&' + 
+//				'WT.ct=unknown&' + 
+//				'WT.bs=1280x646&' + //video/player resolution?
+				'WT.fv=' + flash.system.Capabilities.version + '&' +
+				'WT.slv=unknown&' +
+//				'WT.tv=9.3.0&' +
+//				'WT.dl=49&' +
+				'WT.ssl=0&' +
+				'WT.es=' + _experienceModule.getExperienceURL() + '&' +
+//				'WT.vt_f_a=2&' +
+//				'WT.vt_f=2&' +
+				'WT.clip_ev=' + pEventInfo.eventName + '&' +
+				'WT.clip_t=' + pEventInfo.clipType + '&' +
+				'WT.clip_p=' + pEventInfo.currentPhase + '&' +
+				'WT.clip_n=' + pEventInfo.clipName + '&' +
+				'WT.clip_id=' + pEventInfo.clipID + '&' +
+				'WT.clip_v=' + Math.round(pPlayTime);
 			
 			return webtrendsURL;
 		}
