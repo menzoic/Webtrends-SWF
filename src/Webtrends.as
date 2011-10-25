@@ -29,6 +29,7 @@ package
 	import flash.events.SecurityErrorEvent;
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
+	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
@@ -51,7 +52,7 @@ package
 		private var _mediaBegin:Boolean = false;
 		private var _trackSeekForward:Boolean = false;
 		private var _trackSeekBackward:Boolean = false;
-		private var _multitrackAvailabilityChecked:Boolean = false;
+//		private var _multitrackAvailabilityChecked:Boolean = false;
 		private var _multitrackAvailable:Boolean = false;
 		
 		private var _dataSourceID:String; //Webtrends Profile ID
@@ -71,7 +72,7 @@ package
 		{
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
-			trace("@lastModified 09.08.11 1620 EST");
+			trace("@lastModified 10.24.11 2313 EST");
 			
 			Security.allowDomain('*');
 		}
@@ -105,6 +106,31 @@ package
 			else
 			{
 				onEventsMapParsed(null);
+			}
+			
+			if(ExternalInterface.available)
+			{
+				try
+				{
+					var myJavaScript:String = "(function bc_checkMultitrack(){if(typeof dcsMultiTrack == 'function'){return true;}else{return false;}return false;})();";
+					var dcsResult:Boolean = ExternalInterface.call('eval', myJavaScript);
+					if(dcsResult)
+					{
+						_multitrackAvailable = true;
+					}
+					else
+					{
+						_multitrackAvailable = false;
+					}
+				}
+				catch(pError:Error)
+				{
+					_multitrackAvailable = false;
+				}
+			}
+			else
+			{
+				_multitrackAvailable = false;
 			}
 		}
 		
@@ -478,6 +504,31 @@ package
 			}
 		}
 		
+//		private function trackEvent(pEventInfo:WebtrendsEventObject, pPlayTime:Number):void
+//		{
+//			if(pEventInfo)
+//			{
+//				if(_multitrackAvailable)
+//				{
+//					ExternalInterface.call('dcsMultiTrack', 'DCS.dcsuri' + _experienceModule.getExperienceURL(), 'WT.ti' + pEventInfo.clipName, 'DCSext.bc_evt' + pEventInfo.eventName, 'DCSext.bc_expid' + _experienceModule.getExperienceID(), 'DCSext.bc_expname' + _experienceModule.getPlayerName(), 'DCSext.bc_url' + _experienceModule.getExperienceURL(), 'DCSext.bc_vid' + pEventInfo.clipID, 'DCSext.bc_vname' + pEventInfo.clipName, 'DCSext.bc_pid' + _currentVideo.lineupId);
+//				}
+//				else
+//				{
+//					var request:URLRequest = new URLRequest("http://statse.webtrendslive.com/" + _dataSourceID + 
+//						"/dcs.gif?dcsuri=" + _experienceModule.getExperienceURL() + 
+//						"&WT.js=No&WT.ti=" + pEventInfo.clipName + 
+//						"&bc_evt=" + pEventInfo.eventName + 
+//						"&bc_expid=" + _experienceModule.getExperienceID() + 
+//						"&bc_expname=" + _experienceModule.getPlayerName() + 
+//						"&bc_url=" + _experienceModule.getExperienceURL() + 
+//						"&bc_vid=" + pEventInfo.clipID + 
+//						"&bc_vname=" + pEventInfo.clipName + 
+//						"&bc_pid=" + _currentVideo.lineupId);
+//					var loader:URLLoader = new URLLoader(request);
+//				}
+//			}
+//		}
+		
 		private function getRequestString(pEventInfo:WebtrendsEventObject, pPlayTime:Number):String
 		{
 			var requestString:String;
@@ -524,13 +575,19 @@ package
 				'WT.es=' + _experienceModule.getExperienceURL() + '&' +
 //				'WT.vt_f_a=2&' +
 //				'WT.vt_f=2&' +
+				'WT.co_f=' + getVisitorID() + '&' +
+				'WT.co=yes&' + 
 				'WT.clip_ev=' + pEventInfo.eventName + '&' +
 				'WT.clip_t=' + pEventInfo.clipType + '&' +
 				'WT.clip_p=' + pEventInfo.currentPhase + '&' +
 				'WT.clip_n=' + pEventInfo.clipName + '&' +
 				'WT.clip_id=' + pEventInfo.clipID + '&' +
-				'WT.clip_v=' + Math.round(pPlayTime);
-			
+				'WT.clip_v=' + Math.round(pPlayTime) + '&' +
+				'WT.ria_a=' + _experienceModule.getPlayerName() + '&' +
+				'WT.ria_c=' + pEventInfo.clipID + '&' +
+				'WT.ria_f=' + pEventInfo.clipName + '&' +
+				'WT.ria_ev=' + pEventInfo.eventName;
+				
 			return webtrendsURL;
 		}
 		//--------------------------------------------------------------------------------------------
@@ -540,6 +597,19 @@ package
 		public function getCustomVideoName(video:VideoDTO):String
 		{
 			return video.id + " | " + video.displayName;
+		}
+		
+		private function getVisitorID():Number
+		{
+			var visitorSO:SharedObject = SharedObject.getLocal('webtrends-brightcove');
+			
+			if(!visitorSO.data.visitorID)
+			{
+				visitorSO.data.visitorID = new Date().time;
+				visitorSO.flush();
+			}
+			
+			return visitorSO.data.visitorID;
 		}
 		
 		private function updateVideoInfo():void
