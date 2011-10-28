@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <eventsMap>
 	<initialization>
-		<dataSourceID>dcso0n3zkuz5bdm3jra6tw0wu_9y9w</dataSourceID>
+		<dataSourceID>mydatasourceid</dataSourceID>
 		<trackingModes>
 			<mode name="beacon" value="false" time="5" /><!-- time in seconds -->
 			<mode name="quartile" value="false" />
