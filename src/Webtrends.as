@@ -70,7 +70,7 @@ package
 		{
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
-			trace("@lastModified 10.28.11 0121 EST");
+			trace("@lastModified 10.28.11 1628 EST");
 			
 			Security.allowDomain('*');
 		}

@@ -2,10 +2,6 @@
 <eventsMap>
 	<initialization>
 		<dataSourceID>mydatasourceid</dataSourceID>
-		<trackingModes>
-			<mode name="beacon" value="false" time="5" /><!-- time in seconds -->
-			<mode name="quartile" value="false" />
-		</trackingModes>
 	</initialization>
 	
 	
