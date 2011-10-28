@@ -71,6 +71,7 @@ package
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
 			trace("@lastModified 10.28.11 1628 EST");
+			trace("@version 1.0.0");
 			
 			Security.allowDomain('*');
 		}
