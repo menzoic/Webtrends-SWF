@@ -4,7 +4,6 @@
 		<dataSourceID>mydatasourceid</dataSourceID>
 	</initialization>
 	
-	
 	<events>
 		<!-- VIDEO SPECIFIC EVENTS -->
 		<event name="mediaBegin">
