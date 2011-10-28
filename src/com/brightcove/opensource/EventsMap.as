@@ -56,30 +56,31 @@ package com.brightcove.opensource
 		{
 			_dataSourceID = eventsMap.initialization.dataSourceID;
 			
-			var trackingModes:XMLList = eventsMap.initialization.trackingModes.mode;
-				
-			for(var i:uint = 0; i < trackingModes.length(); i++)
-			{
-				var trackingMode:XML = trackingModes[i];
-				
-				switch(trackingMode.@name)
-				{
-					case 'beacon':
-						if(trackingMode.@value == "true")
-						{
-							_beaconTracking = true;
-						}
-						
-						_beaconInterval = trackingMode.@time;
-						break;
-					case 'quartile':
-						if(trackingMode.@value == "true")
-						{
-							_quartileTracking = true;
-						}
-						break;
-				}
-			}
+			//this still needs to be tested and proven
+//			var trackingModes:XMLList = eventsMap.initialization.trackingModes.mode;
+//				
+//			for(var i:uint = 0; i < trackingModes.length(); i++)
+//			{
+//				var trackingMode:XML = trackingModes[i];
+//				
+//				switch(trackingMode.@name)
+//				{
+//					case 'beacon':
+//						if(trackingMode.@value == "true")
+//						{
+//							_beaconTracking = true;
+//						}
+//						
+//						_beaconInterval = trackingMode.@time;
+//						break;
+//					case 'quartile':
+//						if(trackingMode.@value == "true")
+//						{
+//							_quartileTracking = true;
+//						}
+//						break;
+//				}
+//			}
 		}
 		
 		private function parseEventsMap(eventsMap:XML):void

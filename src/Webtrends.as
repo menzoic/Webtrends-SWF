@@ -544,9 +544,12 @@ package
 				createCuePoints(_eventsMap.milestones, _currentVideo);
 				
 				var cuePoints:Array = _cuePointsModule.getCuePoints(_currentVideo.id);
-				for(var i:uint = 0; i < cuePoints.length; i++)
+				if(cuePoints)
 				{
-					var cuePoint:VideoCuePointDTO = cuePoints[i];
+					for(var i:uint = 0; i < cuePoints.length; i++)
+					{
+						var cuePoint:VideoCuePointDTO = cuePoints[i];
+					}
 				}
 			}
 		}
