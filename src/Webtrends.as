@@ -52,8 +52,6 @@ package
 		private var _mediaBegin:Boolean = false;
 		private var _trackSeekForward:Boolean = false;
 		private var _trackSeekBackward:Boolean = false;
-//		private var _multitrackAvailabilityChecked:Boolean = false;
-		private var _multitrackAvailable:Boolean = false;
 		
 		private var _dataSourceID:String; //Webtrends Profile ID
 		private var _currentVideo:VideoDTO;
@@ -72,7 +70,7 @@ package
 		{
 			trace("@project Webtrends-SWF");
 			trace("@author Brandon Aaskov");
-			trace("@lastModified 10.24.11 2313 EST");
+			trace("@lastModified 10.28.11 0121 EST");
 			
 			Security.allowDomain('*');
 		}
@@ -106,31 +104,6 @@ package
 			else
 			{
 				onEventsMapParsed(null);
-			}
-			
-			if(ExternalInterface.available)
-			{
-				try
-				{
-					var myJavaScript:String = "(function bc_checkMultitrack(){if(typeof dcsMultiTrack == 'function'){return true;}else{return false;}return false;})();";
-					var dcsResult:Boolean = ExternalInterface.call('eval', myJavaScript);
-					if(dcsResult)
-					{
-						_multitrackAvailable = true;
-					}
-					else
-					{
-						_multitrackAvailable = false;
-					}
-				}
-				catch(pError:Error)
-				{
-					_multitrackAvailable = false;
-				}
-			}
-			else
-			{
-				_multitrackAvailable = false;
 			}
 		}
 		
@@ -222,8 +195,6 @@ package
 				_mediaComplete = false;
 				
 				var eventInfo:WebtrendsEventObject = findEventInformation('mediaBegin', _eventsMap.map, _currentVideo);
-				debug("EVENT INFO: " + eventInfo);
-				debug("EVENT TYPE: " + pEvent.type);
 				trackEvent(eventInfo, _timeWatched);
 			}
 		}
@@ -308,6 +279,7 @@ package
 				_mediaComplete = true;
 				
 				var eventInfo:WebtrendsEventObject = findEventInformation('mediaComplete', _eventsMap.map, _currentVideo);
+				eventInfo.milestonePercent = 100;
 				trackEvent(eventInfo, _timeWatched);
 			}
 		}
@@ -445,7 +417,7 @@ package
 		{
 			var cuePoint:VideoCuePointDTO = pEvent.cuePoint;
 			var eventInfo:WebtrendsEventObject;
-			
+		
 			if(cuePoint.type == 1 && cuePoint.name == "webtrends-milestone")
 			{   
 				var metadataSplit:Array;
@@ -453,8 +425,9 @@ package
 				if(cuePoint.metadata.indexOf('%') !== -1) //percentage
 				{
 					metadataSplit = cuePoint.metadata.split('%');
-					
-					eventInfo = findEventInformation('milestone', _eventsMap.map, _currentVideo, 'percent', metadataSplit[0]);
+					var percentage:Number = metadataSplit[0];
+					eventInfo = findEventInformation('milestone', _eventsMap.map, _currentVideo, 'percent', percentage);
+					eventInfo.milestonePercent = percentage;
 					
 					_cuePointsModule.removeCodeCuePointsAtTime(_currentVideo.id, cuePoint.time);
 				}
@@ -497,87 +470,36 @@ package
 			{
 				var request:URLRequest = new URLRequest(getRequestString(pEventInfo, pPlayTime));
 				var loader:URLLoader = new URLLoader();
-				//loader.addEventListener(Event.COMPLETE, onEventPingComplete);
-				//loader.addEventListener(IOErrorEvent.IO_ERROR, onEventPingIOError);
-				//loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onEventPingSecurityError);
 				loader.load(request);
 			}
 		}
 		
-//		private function trackEvent(pEventInfo:WebtrendsEventObject, pPlayTime:Number):void
-//		{
-//			if(pEventInfo)
-//			{
-//				if(_multitrackAvailable)
-//				{
-//					ExternalInterface.call('dcsMultiTrack', 'DCS.dcsuri' + _experienceModule.getExperienceURL(), 'WT.ti' + pEventInfo.clipName, 'DCSext.bc_evt' + pEventInfo.eventName, 'DCSext.bc_expid' + _experienceModule.getExperienceID(), 'DCSext.bc_expname' + _experienceModule.getPlayerName(), 'DCSext.bc_url' + _experienceModule.getExperienceURL(), 'DCSext.bc_vid' + pEventInfo.clipID, 'DCSext.bc_vname' + pEventInfo.clipName, 'DCSext.bc_pid' + _currentVideo.lineupId);
-//				}
-//				else
-//				{
-//					var request:URLRequest = new URLRequest("http://statse.webtrendslive.com/" + _dataSourceID + 
-//						"/dcs.gif?dcsuri=" + _experienceModule.getExperienceURL() + 
-//						"&WT.js=No&WT.ti=" + pEventInfo.clipName + 
-//						"&bc_evt=" + pEventInfo.eventName + 
-//						"&bc_expid=" + _experienceModule.getExperienceID() + 
-//						"&bc_expname=" + _experienceModule.getPlayerName() + 
-//						"&bc_url=" + _experienceModule.getExperienceURL() + 
-//						"&bc_vid=" + pEventInfo.clipID + 
-//						"&bc_vname=" + pEventInfo.clipName + 
-//						"&bc_pid=" + _currentVideo.lineupId);
-//					var loader:URLLoader = new URLLoader(request);
-//				}
-//			}
-//		}
-		
 		private function getRequestString(pEventInfo:WebtrendsEventObject, pPlayTime:Number):String
 		{
 			var requestString:String;
-//			
-//			var dcsuri:String = "Brightcove_event.htm";
-//			var pgtitle:String = "Brightove Player Event";
-//			
-//			if(pMultitrackAvailable)
-//			{
-//				requestString = "dcsMultiTrack('DCS.dcsuri','" + dcsuri + "','WT.ti','"+ pgtitle +"','DCSext.bc_evt','"+ eventName +"','DCSext.bc_expid','"+ _experienceModule.getExperienceID() +"','DCSext.bc_expname','"+ _experienceModule.getPlayerName() +"','DCSext.bc_url','"+ _experienceModule.getExperienceURL() +"','DCSext.bc_vid','"+ _currentVideo.id +"','DCSext.bc_vname','"+ _currentVideo.displayName +"','DCSext.bc_pid','"+ _currentVideo.lineupId +"'" + multitrackstr +")";
-//			}
-//			else
-//			{
-//				var sdcserver:String = "statse.webtrendslive.com";
-//				var nojsstr = "http://" + sdcserver + "/" + _dataSourceID + "/dcs.gif?dcsuri=" + dcsuri + "&WT.js=No&WT.ti=" + pgtitle + "&bc_evt=" + eventName + "&bc_expid=" + _experienceModule.getExperienceID() + "&bc_expname=" + _experienceModule.getPlayerName() + "&bc_url=" + _experienceModule.getExperienceURL() + "&bc_vid=" + _currentVideo.id + "&bc_vname=" + _currentVideo.displayName + "&bc_pid=" + _currentVideo.lineupId + nojsstr;
-//			}
-//			
-			//http://statse.webtrendslive.com/dcsh9n6f8wz5bdo3gun6nwrol_9u6d/dcs.gif?&dcsdat=1315506484403&dcssip=apitest.clark-data-center.com&
-			//dcsuri=/brightcove/testA.html&WT.tz=-4&WT.bh=14&WT.ul=en-US&WT.cd=24&WT.sr=1280x800&WT.jo=Yes&WT.ti=Brightcove%20Test%20Video%20Page&
-			//WT.js=Yes&WT.jv=1.8&WT.ct=unknown&WT.bs=1280x646&WT.fv=10.2&WT.slv=Unknown&WT.tv=9.3.0&WT.dl=40&WT.ssl=0&
-			//WT.es=apitest.clark-data-center.com/brightcove/testA.html&WT.vt_f_a=2&WT.vt_f=2&WT.clip_ev=MediaPlay&WT.clip_t=Brightcove&WT.clip_p=Content&
-			//WT.clip_n=Sample%20Video%202&WT.clip_v=0
 			
+			var clip_ev:String = "v";
+			if(pEventInfo.milestonePercent > -1)
+			{
+				clip_ev = String(pEventInfo.milestonePercent);
+			}
+		
 			var webtrendsURL:String = 'http://statse.webtrendslive.com/' + 
 				_dataSourceID + '/dcs.gif?dcsdat=' + String(new Date().time) + '&' +
 				'dcssip=' + getTopLevelDomain() + '&' +
 				'dcsuri=/brightcove/event.html&' +
 				'WT.tz=' + getTimezone() + '&' +
-//				'WT.bh=14' + '&' +
 				'WT.ul=en.US&' +
-//				'WT.cd=24&' + 
 				'WT.sr=' + getScreenResolution() + '&' +
-//				'WT.jo=Yes&' +
 				'WT.ti=' + _currentVideo.displayName + '&' +
 				'WT.js=' + getJavascriptAvailable() + '&' + 
-//				'WT.jv=1.88&' + 
-//				'WT.ct=unknown&' + 
-//				'WT.bs=1280x646&' + //video/player resolution?
 				'WT.fv=' + flash.system.Capabilities.version + '&' +
 				'WT.slv=unknown&' +
-//				'WT.tv=9.3.0&' +
-//				'WT.dl=49&' +
 				'WT.ssl=0&' +
 				'WT.es=' + _experienceModule.getExperienceURL() + '&' +
-//				'WT.vt_f_a=2&' +
-//				'WT.vt_f=2&' +
 				'WT.co_f=' + getVisitorID() + '&' +
 				'WT.co=yes&' + 
-				'WT.clip_ev=' + pEventInfo.eventName + '&' +
+				'WT.clip_ev=' + clip_ev + '&' +
 				'WT.clip_t=' + pEventInfo.clipType + '&' +
 				'WT.clip_p=' + pEventInfo.currentPhase + '&' +
 				'WT.clip_n=' + pEventInfo.clipName + '&' +
@@ -620,6 +542,12 @@ package
 			if(!_mediaBegin) //we only want to call this once per video
 			{
 				createCuePoints(_eventsMap.milestones, _currentVideo);
+				
+				var cuePoints:Array = _cuePointsModule.getCuePoints(_currentVideo.id);
+				for(var i:uint = 0; i < cuePoints.length; i++)
+				{
+					var cuePoint:VideoCuePointDTO = cuePoints[i];
+				}
 			}
 		}
 		
@@ -655,21 +583,6 @@ package
 			debug('TOP LEVEL DOMAIN: ' + domainSplit[topLevelDomainIndex]);
 			
 			return domainSplit[topLevelDomainIndex];
-			
-//			if(_experienceModule.getExperienceURL().indexOf('://www') !== -1)
-//			{
-//				
-//			}
-//			else if(_experienceModule.getExperienceURL().indexOf('://') !== -1)
-//			{
-//				
-//			}
-//			else
-//			{
-//				
-//			}
-//			
-//			return topLevelDomain;
 		}
 		
 		private function getJavascriptAvailable():String
@@ -715,16 +628,16 @@ package
 					{
 						cuePoint = {
 							type: 1, //code cue point
-							name: "analytics-milestone",
+							name: "webtrends-milestone",
 							metadata: milestone.marker + "%", //percent
-								time: (video.length/1000) * (milestone.marker/100)
+								time: Math.round((video.length/1000) * (milestone.marker/100))
 						};
 					}
 					else if(milestone.type == 'time')
 					{
 						cuePoint = {
 							type: 1, //code cue point
-							name: "analytics-milestone",
+							name: "webtrends-milestone",
 							metadata: milestone.marker + "s", //seconds
 								time: milestone.marker
 						};
@@ -740,7 +653,7 @@ package
 					for(var j:uint = 0; j < existingCuePoints.length; j++)
 					{
 						var existingCuePoint:VideoCuePointDTO = existingCuePoints[j];
-						if(existingCuePoint.type == 1 && existingCuePoint.name == 'analytics-milestone')
+						if(existingCuePoint.type == 1 && existingCuePoint.name == 'webtrends-milestone')
 						{
 							_cuePointsModule.removeCodeCuePointsAtTime(video.id, existingCuePoint.time);
 						}

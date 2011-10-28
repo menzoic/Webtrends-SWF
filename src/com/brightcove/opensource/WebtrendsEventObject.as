@@ -11,6 +11,7 @@ package com.brightcove.opensource
 		private var _clipType:String;
 		private var _currentPhase:String;
 		private var _clipID:String;
+		public var milestonePercent:Number = -1;
 		
 		public function WebtrendsEventObject(internalEventName:String = null, eventName:String = null, clipName:String = null, clipType:String = null, currentPhase:String = null, clipID:String = null)
 		{
@@ -30,6 +31,7 @@ package com.brightcove.opensource
 			response += "clipType = " + clipType + "\n";
 			response += "currentPhase = " + currentPhase + "\n";
 			response += "clipID = " + clipID + "\n";
+			response += "milestonePercent = " + milestonePercent + "\n";
 			
 			return response;
 		}
