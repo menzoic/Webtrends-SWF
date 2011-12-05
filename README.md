@@ -62,6 +62,8 @@ At the top of the sample XML file, you'll see a section called `initialization`.
 In the sample file, you'll see a long list of events. Each `event` entry can `eventName`, `clipName`, `clipType`, `currentPhase` and `clipID` XML nodes inside of it. To use data binding, simply wrap what you want to be bound in curly braces, like so: `<tag name="clipID" value="{video.id}:{video.displayName}" />`
 That will convert to (for example) 1234567890:My Video Name. This data-binding offers you a lot of flexibility into what gets tracked. The list of supported data bindings is below.
 
+To see a complete list of available events, you can preview the [events_map.xml sample file in the assets folder of the project](https://github.com/BrightcoveOS/Webtrends-SWF/blob/master/assets/events_map.xml). Any events that you don't want to capture can be commented out or removed entirely from the XML file.
+
 
 Current Supported Data Binding Fields
 =====================================
