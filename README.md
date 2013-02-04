@@ -30,7 +30,7 @@ Optional: Using the Existing SWF
 --------------------------------
 If you don't want to compile your own SWF, follow these steps (please keep in mind potential latency issues - see above):
 
-1.	Choose the latest download from the [GitHub project's downloads page](https://github.com/BrightcoveOS/Webtrends-SWF/downloads).
+1.	Choose the latest `Webtrends.swf` file from the bin-release folder.
 
 2.	Upload both the SWF file and `events_map.xml` file to a server that's URL addressable; make note of those URLs.
 
@@ -53,7 +53,7 @@ If you don't want to compile your own SWF, follow these steps (please keep in mi
 
 Setting Up Your Events Map XML File 
 -----------------------------------
-Included in each zip on the [project's downloads page](https://github.com/BrightcoveOS/Webtrends-SWF/downloads) is a sample `events_map.xml` file. If you're using the recommended setup option above, *do not* change the name of the file or change its location from the assets folder. Otherwise, the name of the file can be changed. All of the available events that you can tap into are in the sample XML file. You'll even find some `event` nodes in the XML file with no child nodes. Nothing gets tracked when these events fire since there are no props, eVars or events setup for them. You can remove them entirely from the XML file if you want and get the same effect, but it's nice to have them there to remind you what's available. 
+Included in the project's assets folder is a sample `events_map.xml` file. If you're using the recommended setup option above, *do not* change the name of the file or change its location from the assets folder. Otherwise, the name of the file can be changed. All of the available events that you can tap into are in the sample XML file. You'll even find some `event` nodes in the XML file with no child nodes. Nothing gets tracked when these events fire since there are no props, eVars or events setup for them. You can remove them entirely from the XML file if you want and get the same effect, but it's nice to have them there to remind you what's available. 
 
 #### Account Level Settings
 At the top of the sample XML file, you'll see a section called `initialization`. Inside of that is where you can specify the data source ID (dsid) to use for the plugin. You can override the data source ID being used by passing in a parameter on the URL to the plugin, in the player's publishing code, or in the URL of the page. The parameter's key (or name) for overriding that will be `dsid` and the value will be the datasource ID for the account you're reporting into. An example might be `http://mydomain.com/Webtrends.swf?dsid=asd87dfjbmnike892n09023n`.
